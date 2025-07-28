@@ -61,7 +61,7 @@ async def handle_start_async(bot, postgres_url, update: Update):
     save_user_sync_postgres(postgres_url, user_id, username)
     
     # !!! УБЕДИТЕСЬ, ЧТО ЭТОТ БЛОК ВЫГЛЯДИТ ИМЕННО ТАК !!!
-    TEST_DASHBOARD_URL = "https://aleksei23122012.github.io/test/test-dashboard.html" # Я вставил вашу ссылку
+    TEST_DASHBOARD_URL = "https://aleksei23122012.github.io/DMdashbordbot/aaa.htm" # Я вставил вашу ссылку
     
     keyboard = [
         # Вот она, наша новая кнопка!
