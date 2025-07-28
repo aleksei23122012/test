@@ -7,7 +7,7 @@ from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, Bo
 
 app = Flask(__name__)
 
-# --- Функции для работы с базой данных ---
+# --- Функции для работы с базой данных (остаются без изменений) ---
 def save_user_sync_postgres(postgres_url, user_id: int, username: str):
     try:
         sql = """
@@ -60,14 +60,18 @@ async def handle_start_async(bot, postgres_url, update: Update):
     
     save_user_sync_postgres(postgres_url, user_id, username)
     
-    # !!! УБЕДИТЕСЬ, ЧТО ЭТОТ БЛОК ВЫГЛЯДИТ ИМЕННО ТАК !!!
-    TEST_DASHBOARD_URL = "https://aleksei23122012.github.io/DMdashbordbot/aaa.htm" # Я вставил вашу ссылку
+    # !!! ССЫЛКА ОБНОВЛЕНА !!!
+    # Здесь теперь указан ваш правильный тестовый дашборд
+    TEST_DASHBOARD_URL = "https://aleksei23122012.github.io/DMdashbordbot/aaa.htm" 
     
     keyboard = [
-        [KeyboardButton("Дашборд", web_app=WebAppInfo(url="https://aleksei23122012.github.io/DMdashbordbot/aaa.htm"))],
+        # Кнопка "Дашборд", которая ведет на ваш тестовый сайт
+        [KeyboardButton("Дашборд", web_app=WebAppInfo(url=TEST_DASHBOARD_URL))],
+        
+        # Остальные кнопки
         [KeyboardButton("База знаний", web_app=WebAppInfo(url="https://aleksei23122012.teamly.ru/space/00647e86-cd4b-46ef-9903-0af63964ad43/article/17e16e2a-92ff-463c-8bf4-eaaf202c0bc7"))],
         [KeyboardButton("Отработка возражений", web_app=WebAppInfo(url="https://baza-znaniy-app.vercel.app/"))],
-        [KeyboardButton("Отзывы и предложения", web_app=WebAppInfo(url="https://aleksei23122012.github.io/DMdashbordbot/aaa.htm"))]
+        [KeyboardButton("Отзывы и предложения", web_app=WebAppInfo(url="https://docs.google.com/forms/d/e/1FAIpQLSedAPNqKkoJxer4lISLVsQgmu6QpPagoWreyvYOz7DbFuanFw/viewform?usp=header"))]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
