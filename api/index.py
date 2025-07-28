@@ -1,19 +1,15 @@
 import os
 import asyncio
 import traceback
-import psycopg2 # Используем библиотеку для Postgres
+import psycopg2 
 from flask import Flask, request
 from telegram import Update, WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, Bot, error
 
-# === Глобальная область: только создание Flask-приложения ===
 app = Flask(__name__)
-
 
 # --- Функции для работы с базой данных ---
 def save_user_sync_postgres(postgres_url, user_id: int, username: str):
-    """СИНХРОННО сохраняет или обновляет пользователя в Vercel Postgres."""
     try:
-        # ON CONFLICT (chat_id) DO UPDATE... - это команда "upsert" для Postgres
         sql = """
         INSERT INTO users (chat_id, username)
         VALUES (%s, %s)
@@ -32,14 +28,11 @@ def save_user_sync_postgres(postgres_url, user_id: int, username: str):
         print(traceback.format_exc())
 
 def get_all_user_ids(postgres_url):
-    """СИНХРОННО получает список всех chat_id из базы."""
     user_ids = []
     try:
         conn = psycopg2.connect(postgres_url)
         cur = conn.cursor()
         cur.execute("SELECT chat_id FROM users;")
-        # fetchall() возвращает список кортежей, например [(123,), (456,)]
-        # Мы извлекаем из них только первые элементы (сами ID)
         user_ids = [item[0] for item in cur.fetchall()]
         cur.close()
         conn.close()
@@ -48,7 +41,6 @@ def get_all_user_ids(postgres_url):
     return user_ids
     
 def remove_user_sync_postgres(postgres_url, user_id: int):
-    """СИНХРОННО удаляет пользователя (например, если он заблокировал бота)."""
     try:
         conn = psycopg2.connect(postgres_url)
         cur = conn.cursor()
@@ -68,22 +60,28 @@ async def handle_start_async(bot, postgres_url, update: Update):
     
     save_user_sync_postgres(postgres_url, user_id, username)
     
+    # !!! УБЕДИТЕСЬ, ЧТО ЭТОТ БЛОК ВЫГЛЯДИТ ИМЕННО ТАК !!!
+    TEST_DASHBOARD_URL = "https://aleksei23122012.github.io/test/test-dashboard.html" # Я вставил вашу ссылку
+    
     keyboard = [
+        # Вот она, наша новая кнопка!
+        [KeyboardButton("Дашборд", web_app=WebAppInfo(url=TEST_DASHBOARD_URL))],
+        
+        # Остальные кнопки
         [KeyboardButton("База знаний", web_app=WebAppInfo(url="https://aleksei23122012.teamly.ru/space/00647e86-cd4b-46ef-9903-0af63964ad43/article/17e16e2a-92ff-463c-8bf4-eaaf202c0bc7"))],
         [KeyboardButton("Отработка возражений", web_app=WebAppInfo(url="https://baza-znaniy-app.vercel.app/"))],
         [KeyboardButton("Отзывы и предложения", web_app=WebAppInfo(url="https://docs.google.com/forms/d/e/1FAIpQLSedAPNqKkoJxer4lISLVsQgmu6QpPagoWreyvYOz7DbFuanFw/viewform?usp=header"))]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    
     await update.message.reply_text(
         "Привет! 😊\n\n"
-        "Чтобы открыть главный дашборд, нажми на кнопку **Дашборд** слева от поля ввода.\n\n"
-        "А с помощью кнопок ниже ты можешь открыть другие полезные разделы.",
+        "Это тестовая версия бота. С помощью кнопок ниже ты можешь открыть полезные разделы.",
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
     
 async def handle_admin_command_async(bot, postgres_url, update: Update):
-    """Обрабатывает все команды администратора."""
     text_parts = update.message.text.split(' ', 1)
     command = text_parts[0]
     admin_id = update.message.chat_id
@@ -100,33 +98,27 @@ async def handle_admin_command_async(bot, postgres_url, update: Update):
         except Exception as e:
             await update.message.reply_text(f"Ошибка получения статистики: {e}")
     
-    # --- НОВЫЙ ПОЛНОЦЕННЫЙ БЛОК ДЛЯ /broadcast ---
     elif command == '/broadcast' and len(text_parts) > 1:
         message_to_send = text_parts[1]
         await update.message.reply_text("Начинаю рассылку...")
-
         user_ids = get_all_user_ids(postgres_url)
-        
         success_count = 0
         for user_id in user_ids:
             try:
                 await bot.send_message(chat_id=user_id, text=message_to_send, parse_mode='Markdown')
                 success_count += 1
-                await asyncio.sleep(0.05) # Небольшая задержка
+                await asyncio.sleep(0.05)
             except error.Forbidden:
                 remove_user_sync_postgres(postgres_url, user_id)
             except error.TelegramError as e:
                 print(f"Не удалось отправить сообщение {user_id}: {e}")
-        
         await update.message.reply_text(f"Рассылка завершена. Отправлено: {success_count} из {len(user_ids)}.")
-
     else:
         await update.message.reply_text(
             "Неизвестная команда или неверный формат.\n"
             "Доступные команды:\n`/broadcast <текст>`\n`/stats`",
             parse_mode='Markdown'
         )
-
 
 # === ГЛАВНЫЙ ВЕБХУК ===
 @app.route('/', methods=['POST'])
