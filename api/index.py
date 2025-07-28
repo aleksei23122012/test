@@ -67,7 +67,7 @@ async def handle_start_async(bot, postgres_url, update: Update):
         [KeyboardButton("Дашборд", web_app=WebAppInfo(url="https://aleksei23122012.github.io/DMdashbordbot/aaa.htm"))],
         [KeyboardButton("База знаний", web_app=WebAppInfo(url="https://aleksei23122012.teamly.ru/space/00647e86-cd4b-46ef-9903-0af63964ad43/article/17e16e2a-92ff-463c-8bf4-eaaf202c0bc7"))],
         [KeyboardButton("Отработка возражений", web_app=WebAppInfo(url="https://baza-znaniy-app.vercel.app/"))],
-        [KeyboardButton("Отзывы и предложения", web_app=WebAppInfo(url="https://docs.google.com/forms/d/e/1FAIpQLSedAPNqKkoJxer4lISLVsQgmu6QpPagoWreyvYOz7DbFuanFw/viewform?usp=header"))]
+        [KeyboardButton("Отзывы и предложения", web_app=WebAppInfo(url="https://aleksei23122012.github.io/DMdashbordbot/aaa.htm"))]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     
